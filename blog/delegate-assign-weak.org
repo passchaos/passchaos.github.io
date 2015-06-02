@@ -1,0 +1,28 @@
+#+TITLE:       OC代理设计模式中delegate属性在assign和weak之间的选择
+#+AUTHOR:      Greedwolf DSS
+#+EMAIL:       greedwolf.dss@gmail.com
+#+DATE:        2015-06-02 Tue
+#+URI:         /blog/2015/04/20/oc代理设计模式中delegate属性在assign和weak之间的选择
+#+KEYWORDS:    delegate, weak, assign
+#+TAGS:        <TODO: insert your tags here>
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+在ARC之前，使用代理，我们常用assign表示代理属性，来防止出现“循环引用”，在苹果引入ARC之后，使用weak类型指针是一个更好的选择。但是，在苹果现有的系统库中，我们仍然可以看到使用assign标示代理指针的属性。
+
+比如，很常用的UIScrollView控件中的代理就仍然使用assign：
+#+BEGIN_EXAMPLE
+// default nil. weak reference
+@property(nonatomic,assign) id<UIScrollViewDelegate>      delegate;
+#+END_EXAMPLE
+很明显，weak因为可以自动地被设置为nil，防止了“悬挂指针”的出现，但是在某些情况下，assign仍然是一个更好的选择。
+
+比如在下面两种情况下，assign是一个更好的选择：
+
+1. 需要在对象销毁时执行一些操作。
+
+因为如果使用weak，我们无法具体的知晓对象什么时候被销毁；而使用assign，因为我们需要手动进行指针的赋值为空指针，我们可以控制对象的销毁时刻，在这里我们可以进行一些需要的操作。
+
+2. 一些类库不支持weak（或不支持ARC）
+
+实际上，苹果的系统库中就经常混用assign和weak，尤其是OSX的一些库中，因为有一些类库还不支持weak，甚至不支持ARC。
