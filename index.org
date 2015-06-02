@@ -1,3 +1,6 @@
 #+TITLE: Index
 
 This is the home page of Greedwolf DSS.
+
+Emacs，Org-mode
+数学、AI、量子计算。
