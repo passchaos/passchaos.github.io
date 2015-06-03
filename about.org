@@ -1,5 +1,3 @@
 #+TITLE: About
 
-* About Greedwolf DSS
-
   一名iOS学习者。
