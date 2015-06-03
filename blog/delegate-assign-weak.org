@@ -4,7 +4,7 @@
 #+DATE:        2015-04-20 Tue
 #+URI:         /blog/2015/04/20/oc代理设计模式中delegate属性在assign和weak之间的选择
 #+KEYWORDS:    delegate, weak, assign
-#+TAGS:        <TODO: insert your tags here>
+#+TAGS:        delegate, weak, assign
 #+LANGUAGE:    en
 #+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
 #+DESCRIPTION: <TODO: insert your description here>

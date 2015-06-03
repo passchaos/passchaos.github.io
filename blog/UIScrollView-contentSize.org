@@ -4,7 +4,7 @@
 #+DATE:        2015-04-26 Sun
 #+URI:         /blog/%y/%m/%d/uiscrollview的contentsize属性的一点观点
 #+KEYWORDS:    contentSize
-#+TAGS:        <TODO: insert your tags here>
+#+TAGS:        UIScrollView, bounds
 #+LANGUAGE:    en
 #+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
 #+DESCRIPTION: <TODO: insert your description here>
