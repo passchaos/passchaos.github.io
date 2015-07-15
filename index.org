@@ -2,5 +2,7 @@
 
 This is the home page of Greedwolf DSS.
 
-Emacs，Org-mode
+Emacs、iOS、
 数学、AI、量子计算。
+
+字体、特效。
