@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>OC代理设计模式中delegate属性在assign和weak之间的选择 - Through the Chaos!</title>
+    <title>UIScrollView的contentSize属性的一点观点 - Through the Chaos!</title>
     <meta charset="utf-8" />
     <meta name="author" content="Greedwolf DSS" />
     <meta name="description" content="&lt;TODO: insert your description here&gt;" />
-    <meta name="keywords" content="delegate, weak, assign" />
+    <meta name="keywords" content="contentSize" />
     <link rel="stylesheet" href="/media/css/main.css" type="text/css">
     <link rel="stylesheet" href="/media/css/prettify.css" type="text/css">
   </head>
@@ -30,51 +30,34 @@
 
 <div>
 <div class="post">
-<h1>OC代理设计模式中delegate属性在assign和weak之间的选择</h1>
+<h1>UIScrollView的contentSize属性的一点观点</h1>
 <p>
-在ARC之前，使用代理，我们常用assign表示代理属性，来防止出现“循环引用”，在苹果引入ARC之后，使用weak类型指针是一个更好的选择。但是，在苹果现有的系统库中，我们仍然可以看到使用assign标示代理指针的属性。
+学习UIScrollView时，对于图片的滚动的原理了解的很模糊，最初觉得只要能做出效果来，内部怎么实现的好像都不重要。不过心中总是有个结，不理解contentSize的限制到底是什么原因。
 </p>
 
 <p>
-比如，很常用的UIScrollView控件中的代理就仍然使用assign：
-</p>
-<pre class="example">
-// default nil. weak reference
-@property(nonatomic,assign) id&lt;UIScrollViewDelegate&gt; delegate;
-</pre>
-<p>
-很明显，weak因为可以自动地被设置为nil，防止了“悬挂指针”的出现，但是在某些情况下，assign仍然是一个更好的选择。
+后来，粗略看了苹果的官方文档，算是有了一个大概的印象。UIScrollView的滚动效果并不是某个视图或空间进行了移动，也不是UIScrollView对象自身移动了。在用户滚动时，系统会自动计算UIScrollView的contentOffset，然后根据contentOffset和UIScrollView自身的bounds，然后在UIScrollView的content视图里面选取对应区域的内容进行显示，如此从表面看，我们在滚动屏幕时，对应的图片也滚动了。
 </p>
 
 <p>
-比如在下面两种情况下，assign是一个更好的选择：
+举一个例子，假如我们将contentSize设置为500x300，UIScrollView对象本身的bounds为（0,0,100,100），那么我们向左滚动屏幕中可滚动部分（UIScrollView对象对应部分），此时contentOffset为（100,0），那么UIScrollView对象就会显示其content中frame为（100,0,100,100）部分的内容，在这个滚动的过程中UIScrollView对象本身的frame没有变化，显示的图片对应的控件的frame也没有发生变化。
 </p>
 
-<ol class="org-ol">
-<li>需要在对象销毁时执行一些操作。
-</li>
-</ol>
-
 <p>
-因为如果使用weak，我们无法具体的知晓对象什么时候被销毁；而使用assign，因为我们需要手动进行指针的赋值为空指针，我们可以控制对象的销毁时刻，在这里我们可以进行一些需要的操作。
+实际上我们也可以根据标识符（变量名称或方法名称）判断具体情况。比如contentSize和contentOffset，显然是和内容（content），而不是和UIScrollView相关的。了解了具体的实现，再看标识符，才能更好地记忆方法名，属性名和对应的限制（比如为何contentSize至少要有一个方向的长度大于UIScrollView对象对应的长度）。
 </p>
 
-<ol class="org-ol">
-<li>一些类库不支持weak（或不支持ARC）
-</li>
-</ol>
-
 <p>
-实际上，苹果的系统库中就经常混用assign和weak，尤其是OSX的一些库中，因为有一些类库还不支持weak，甚至不支持ARC。
+更新：<span class="timestamp-wrapper"><span class="timestamp">&lt;2015-06-07 Sun&gt;</span></span>
 </p>
 
 </div>
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-03-20</span>
+        <span title="post date" class="post-info">2015-03-26</span>
         <span title="last modification date" class="post-info">2015-07-19</span>
-        <span title="tags" class="post-info"><a href="/tags/delegate/">delegate</a> <a href="/tags/weak/">weak</a> <a href="/tags/assign/">assign</a></span>
+        <span title="tags" class="post-info"><a href="/tags/uiscrollview/">UIScrollView</a> <a href="/tags/bounds/">bounds</a></span>
         <span title="author" class="post-info">Greedwolf DSS</span>
       </div>
       <section>
@@ -82,8 +65,8 @@
         <div id="disqus_thread"></div>
         <script type="text/javascript">
           //var disqus_developer = 1;
-          var disqus_identifier = "/blog/2015/04/20/oc代理设计模式中delegate属性在assign和weak之间的选择";
-          var disqus_url = "http://passchaos.com/blog/2015/04/20/oc代理设计模式中delegate属性在assign和weak之间的选择";
+          var disqus_identifier = "/blog/2015/03/26/uiscrollview的contentsize属性的一点观点";
+          var disqus_url = "http://passchaos.com/blog/2015/03/26/uiscrollview的contentsize属性的一点观点";
           var disqus_shortname = 'throughthechaos';
           /* * * DON'T EDIT BELOW THIS LINE * * */
           (function() {
