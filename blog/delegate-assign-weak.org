@@ -1,7 +1,7 @@
 #+TITLE:       OC代理设计模式中delegate属性在assign和weak之间的选择
 #+AUTHOR:      Greedwolf DSS
 #+EMAIL:       greedwolf.dss@gmail.com
-#+DATE:        2015-04-20 Tue
+#+DATE:        2015-03-20 Tue
 #+URI:         /blog/2015/04/20/oc代理设计模式中delegate属性在assign和weak之间的选择
 #+KEYWORDS:    delegate, weak, assign
 #+TAGS:        delegate, weak, assign
