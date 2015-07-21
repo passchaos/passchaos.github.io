@@ -1,0 +1,46 @@
+#+TITLE:       XML多代理解析方法
+#+AUTHOR:      Greedwolf DSS
+#+EMAIL:       greedwolf.dss@gmail.com
+#+DATE:        2015-07-21 Tue
+#+URI:         /blog/%y/%m/%d/xml多代理解析方法
+#+KEYWORDS:    xml
+#+TAGS:        xml, delegate
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+XML文件虽然在工业界应用广泛，但是在网络时代其应用范围远远不及json格式文件，但是XML仍然有其应用的范围。
+
+在iOS平台下，由于内存占用的考虑，苹果并没有提供DOM解析XML文件的方式，而只提供了SAX解析方式，或称为流式解析方式。具体的解析步骤就是首先根据解析文件生成一个解析器，然后使用代理进行具体的解析。主要应用到的解析方法如下：
+#+BEGIN_EXAMPLE
+
+- parser:didStartElement:namespaceURI:qualifiedName:attributes:
+发现结点（存储的单元)，开始解析
+
+- parser:foundCharacters:
+发现结点的内容
+
+- parser:didEndElement:namespaceURI:qualifiedName:
+结束结点的解析
+#+END_EXAMPLE
+
+流式解析方式简单直观，而且速度很快，但是如果要解析较大的文件，会发现在这三个文件中需要写很多重复的代码。
+
+实际上，XML虽然内容较为冗余（出去具体的内容，有很多的“起始标记”），但是正是这种冗余，我们可以很严格地将XML文件进行不同层次的划分。
+
+对于DOM解析方式，实际上是把XML文件全部放入内存，然后像树一样进行解析，显然树的每一个层级又是一个树。由此想法，在进行XML的SAX解析时，我们可以不断地进行“递归”解析。
+
+具体内容可以见我的github项目[[https://github.com/passchaos][XML多代理解析]]。
+
+这个解析方式的具体方式为：
+1. 定义一个结点类，用于保存每个结点的内容，这个结点有属性：结点名称，结点属性，结点内容，父结点，所有的子结点。
+   其中，父结点只有一个，子结点使用一个数组存放。并且重要的是：
+   #+BEGIN_QUOTE
+   每个结点在创建的时候，都要将其赋值为XML解析器的代理对象。
+   #+END_QUOTE
+2. 创建一个结点作为顶结点，开始解析
+3. 代理方法：
+   - ~- parser:didStartElement:namespaceURI:qualifiedName:attributes:~ :: 这个方法里面，将 ~elementName~ 付给当前代理对象的 ~name~ 属性， ~attributeDict~ 赋给代理对象的 ~attributes~ 属性。 *并且创建一个Element对象，将其作为当前对象的一个子结点（注意，创建之后，解析器的代理对象变为新创建的结点）* 。
+   - ~- parser:foundCharacters:~ :: 这个方法里面，将发现的字符串 *附加* 到当前对象的 ~contents~ 属性。
+   - ~- parser:didEndElement:namespaceURI:qualifiedName:~ :: 这个方法里面，当前解析的结点解析结束，再将其父结点赋为解析器的代理。
+
+主要的解析路径类似数据结构中的“深度优先搜索”，虽然可能由于不停地切换代理，可能会有性能损失，但是整个的模式却很简洁，尤其是对于较大型的XML文件，代码更有层次性。
