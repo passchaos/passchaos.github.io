@@ -1,0 +1,14 @@
+#+TITLE:       iOS下实现360ᵒ旋转
+#+AUTHOR:      Greedwolf DSS
+#+EMAIL:       greedwolf.dss@gmail.com
+#+DATE:        2015-07-26 Sun
+#+URI:         /blog/%y/%m/%d/ios下实现360度旋转
+#+KEYWORDS:    animation, keyframe
+#+TAGS:        animation, ios
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+iOS下的动画效果非常多，尤其是借助于CoreAnimation时，更是可以实现各种奇妙的动画。
+
+不过为了性能，iOS下的动画有很多“坑”，比如在进行旋转时，系统会自动计算出动画的最终位置
+
