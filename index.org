@@ -2,7 +2,8 @@
 
 This is the home page of Greedwolf DSS.
 
-Emacs、iOS、
-数学、AI、量子计算。
+Emacs、TeXmacs
 
-字体、图形渲染。
+字体、图形渲染
+
+数学、AI、量子计算
