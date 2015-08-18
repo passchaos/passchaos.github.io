@@ -1,0 +1,53 @@
+#+TITLE:       实现安全的单例
+#+AUTHOR:      Greedwolf DSS
+#+EMAIL:       greedwolf.dss@gmail.com
+#+DATE:        2015-05-18 Tue
+#+URI:         /blog/%y/%m/%d/实现安全的单例
+#+KEYWORDS:    <TODO: insert your keywords here>
+#+TAGS:        singleton
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+单例是个很有用的设计模式，降低了在复杂环境下的管理难度。但是如果想要合作开发，最好告诉合作者
+你的哪个类可以使用单例。
+
+默认情况下，即使你实现了单例，但是如果别人不知道，他可能第一想法还是自己手动创建一个对象来，
+因此，我们可以在调用创建对象方法时提示一下使用者。
+
+在clang编译器前端中有一个属性__attribute__，这个属性很强大，可以实现各种奇怪的特性。这里，我们
+使用__attribute__((unavailable("请使用单例")))，如下例：
+
+#+BEGIN_EXAMPLE
+- (instancetype)init __attribute__((unavailable("请使用单例")));
+#+END_EXAMPLE
+
+加入上边例子中的特殊指令后，在Xcode中就不能智能提示出init方法了，如果手动打出，会提示错误：“请使用单例”。
+
+同样还可以使用一种简略形式：
+#+BEGIN_EXAMPLE
+- (instancetype)init UNAVAILABLE_ATTRIBUTE;
+#+END_EXAMPLE
+这种形式不会提示具体的错误消息，如“请使用单例”，但是在Xcode中可以自动提示打出，而__attribute__需要
+手动打出。
+
+前边的两种方法都是clang提供的指令，同样我们也可以使用覆盖对应方法调用的策略。
+
+1. 使用断言
+   在覆盖init的方法内部最前面加入断言：
+   #+BEGIN_EXAMPLE
+   NSAssert(NO, @"请使用单例");
+   #+END_EXAMPLE
+2. 抛出错误
+   在覆盖的方法内部最前面调用抛出错误的方法：
+   #+BEGIN_EXAMPLE
+   [self doesNotRecognizeSelector:_cmd];
+   #+END_EXAMPLE
+#+BEGIN_QUOTE
+我看到有些地方会加入防拷贝，实际上一般的单例，如果不自己实现NSCopying或NSMutableCopying协议，那么
+是无法调用copy和mutableCopy方法的，因此，防拷贝功效不大。而且有些为了单例安全，会覆盖init/new/copy/mutableCopy
+等方法来返回单例，以防止创建新的对象，但是我认为这样实际上使代码变得奇怪，因为init/new/mutableCopy默认都会返回一个
+新的对象，如果直接覆盖，返回新的对象无疑会造成逻辑的冲突。
+#+END_QUOTE
+
+上面的几种方法里面，显然第一种使用__attribute__的方法最简单并且可以在程序崩溃之前就告诉使用者
+需要使用单例。
