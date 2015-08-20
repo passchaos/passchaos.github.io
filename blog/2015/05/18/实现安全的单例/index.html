@@ -37,13 +37,13 @@
 </p>
 
 <p>
-默认情况下，即使你实现了单例，但是如果别人不知道，他可能第一想法还是自己手动创建一个对象来，
-因此，我们可以在调用创建对象方法时提示一下使用者。
+默认情况下，即使你实现了单例，但是如果别人不知道，他可能第一想法还是自己手动创建一个对象来。
+因此，我们最好可以在调用创建对象方法时提示一下使用者。
 </p>
 
 <p>
-在clang编译器前端中有一个属性__attribute__，这个属性很强大，可以实现各种奇怪的特性。这里，我们
-使用__attribute__((unavailable("请使用单例")))，如下例：
+在clang编译器前端中有一个属性 <code>__attribute__</code> ，这个属性很强大，可以实现各种奇怪的特性。这里，我们
+使用 <code>__attribute__((unavailable("请使用单例")))</code> ，如下例：
 </p>
 
 <pre class="example">
@@ -51,7 +51,7 @@
 </pre>
 
 <p>
-加入上边例子中的特殊指令后，在Xcode中就不能智能提示出init方法了，如果手动打出，会提示错误：“请使用单例”。
+加入上边例子中的特殊指令后，在Xcode中就不能智能提示出 <code>init</code> 方法了，如果手动打出，会提示错误：“请使用单例”。
 </p>
 
 <p>
@@ -61,12 +61,12 @@
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
 </pre>
 <p>
-这种形式不会提示具体的错误消息，如“请使用单例”，但是在Xcode中可以自动提示打出，而__attribute__需要
+这种形式不会提示具体的错误消息，如“请使用单例”，但是在Xcode中可以自动提示打出，而 <code>__attribute__</code> 需要
 手动打出。
 </p>
 
 <p>
-前边的两种方法都是clang提供的指令，同样我们也可以使用覆盖对应方法调用的策略。
+前边的两种方法都是clang提供的指令，同样我们也可以使用覆盖方法调用的策略。
 </p>
 
 <ol class="org-ol">
@@ -87,15 +87,14 @@ NSAssert(NO, @"请使用单例");
 </ol>
 <blockquote>
 <p>
-我看到有些地方会加入防拷贝，实际上一般的单例，如果不自己实现NSCopying或NSMutableCopying协议，那么
-是无法调用copy和mutableCopy方法的，因此，防拷贝功效不大。而且有些为了单例安全，会覆盖init/new/copy/mutableCopy
-等方法来返回单例，以防止创建新的对象，但是我认为这样实际上使代码变得奇怪，因为init/new/mutableCopy默认都会返回一个
-新的对象，如果直接覆盖，返回新的对象无疑会造成逻辑的冲突。
+我看到有些地方会加入防拷贝策略，就是重写copy相关方法，直接返回单例。但是实际上一般的单例对象，如果不自己实现NSCopying或NSMutableCopying协议，那么是无法调用copy和mutableCopy方法的，因此，防拷贝作用不大。而且最好不要覆盖init/new/copy/mutableCopy
+等方法来返回单例，这种方法防止创建新的对象，但是我认为这样实际上使代码变得奇怪，因为init/new/mutableCopy默认都会返回一个
+新的对象，如果直接覆盖，无疑会造成逻辑的冲突。
 </p>
 </blockquote>
 
 <p>
-上面的几种方法里面，显然第一种使用__attribute__的方法最简单并且可以在程序崩溃之前就告诉使用者
+上面的几种方法里面，显然第一种使用 <code>__attribute__</code> 的方法最简单并且可以在程序崩溃之前就告诉使用者
 需要使用单例。
 </p>
 
@@ -104,7 +103,7 @@ NSAssert(NO, @"请使用单例");
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2015-05-18</span>
-        <span title="last modification date" class="post-info">2015-08-18</span>
+        <span title="last modification date" class="post-info">2015-08-20</span>
         <span title="tags" class="post-info"><a href="/tags/singleton/">singleton</a></span>
         <span title="author" class="post-info">Greedwolf DSS</span>
       </div>
