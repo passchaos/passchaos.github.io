@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>OC运行时小结之一 - Through the Chaos!</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Greedwolf DSS" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="&lt;TODO: insert your keywords here&gt;" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link rel="stylesheet" href="/media/css/prettify.css" type="text/css">
+  </head>
+  <body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">Through the Chaos!</a></h1>
+        <p>==================&gt; 知我罪我，唯有春秋！</p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://github.com/passchaos">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="passchaos.com">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>OC运行时小结之一</h1>
+<p>
+运行时是OC实现面向对象的保证，而且还可以实现各种各样的“黑魔法”。但是要注意的是，这些“黑魔法”不应该多用，
+因为苹果会改变运行时的底层实现原理，虽然对外的接口没有变化，但是内部的实现会经常变化。
+</p>
+
+<p>
+实际开发中，要用到运行时的地方很少，但是很多地方没有运行时的概念，就很难准确理解真正的含义。比如说下面的例子：
+（其中Person为一个继承自NSObject的类）
+</p>
+<pre class="example">
+NSLog(@"%d %d", [(id)[NSObject class] isKindOfClass:[NSObject class]],
+              [(id)[Person class] isKindOfClass:[Person class]]);
+</pre>
+<p>
+打印输出为：1和0。这样的结果看起来很奇怪，为何相同的形式会有不同的结果呢？我们可以从运行时的角度查看原因。
+</p>
+
+<p>
+在苹果的开源网址提供了运行时的实现代码，其中 <code>isKindOfClass</code> 的实现为：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-C">- (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = [self class]; tcls; tcls = tcls-&gt;superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+</pre>
+</div>
+<p>
+再来看 <code>class</code> 方法的实现：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-C">- (Class)class {
+    return object_getClass(self);
+}
+</pre>
+</div>
+<p>
+以及 <code>object_getClass</code> 的实现：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-C">Class object_getClass(id obj)
+{
+    if (obj) return obj-&gt;getIsa();
+    else return Nil;
+}
+</pre>
+</div>
+<p>
+也就是说在 <code>isKindOfClass的内部循环中，首先获取传入消息接受者对应的类。而类实际上也是一个对象，那么
+类中也有 ~isa</code> 指针，这个指针指向类对象的类，我们称为元类。
+</p>
+
+<p>
+对象、类、元类的关系如下图：
+<img src="file:///Volumes/passchaos/notes/attatched/Class&amp;MetaClass.001.jpg" alt="Class&amp;MetaClass.001.jpg" />
+因此，在循环中，首先获得了NSObject类的元类，然后再循环地获取元类的父类后又回到了NSObject类本身，因此
+循环中的判断条件满足；但是使用Person类时，会先在元类之间跳转，最后跳到NSObject类，然后是nil，一直没有
+满足提前返回的条件。
+</p>
+
+<p>
+在关于isKindOfClass方法的文档说明中，使用了一个NSMutableArray的例子来演示不要使用isKindOfClass来判断
+接受者是否可变，但是这个例子似乎是错误的，我们有例子：
+</p>
+<pre class="example">
+NSData *data = [NSData data];
+NSData *dataM = [NSMutableData data];
+NSString *string = [NSString string];
+NSString *stringM = [NSMutableString string];
+NSArray *array = [NSArray array];
+NSMutableArray *arrayM = [NSMutableArray array];
+NSDictionary *dict = [NSDictionary dictionary];
+NSMutableDictionary *dictM = [NSMutableDictionary dictionary];
+NSSet *set = [NSSet set];
+NSMutableSet *setM = [NSMutableSet set];
+
+NSArray *objects = @[
+    data,
+    dataM,
+    string,
+    stringM,
+    array,
+    arrayM,
+    dict,
+    dictM,
+    set,
+    setM
+];
+for (id obj in objects) {
+    for (Class testClass = object_getClass(obj); testClass;
+         testClass = [(id)testClass superclass]) {
+        NSLog(@"%@", testClass);
+    }
+    NSLog(@"-------------");
+}
+</pre>
+<p>
+同样有输出：
+</p>
+<pre class="example">
+2015-08-23 15:21:37.139 Runtime[1958:252674] _NSZeroData
+2015-08-23 15:21:37.141 Runtime[1958:252674] NSData
+2015-08-23 15:21:37.142 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.142 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.142 Runtime[1958:252674] NSConcreteMutableData
+2015-08-23 15:21:37.142 Runtime[1958:252674] NSMutableData
+2015-08-23 15:21:37.143 Runtime[1958:252674] NSData
+2015-08-23 15:21:37.143 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.143 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.143 Runtime[1958:252674] __NSCFConstantString
+2015-08-23 15:21:37.144 Runtime[1958:252674] __NSCFString
+2015-08-23 15:21:37.144 Runtime[1958:252674] NSMutableString
+2015-08-23 15:21:37.144 Runtime[1958:252674] NSString
+2015-08-23 15:21:37.145 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.145 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.145 Runtime[1958:252674] __NSCFString
+2015-08-23 15:21:37.145 Runtime[1958:252674] NSMutableString
+2015-08-23 15:21:37.146 Runtime[1958:252674] NSString
+2015-08-23 15:21:37.146 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.146 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.146 Runtime[1958:252674] __NSArrayI
+2015-08-23 15:21:37.147 Runtime[1958:252674] NSArray
+2015-08-23 15:21:37.147 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.147 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.148 Runtime[1958:252674] __NSArrayM
+2015-08-23 15:21:37.148 Runtime[1958:252674] NSMutableArray
+2015-08-23 15:21:37.148 Runtime[1958:252674] NSArray
+2015-08-23 15:21:37.149 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.149 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.149 Runtime[1958:252674] __NSDictionaryI
+2015-08-23 15:21:37.150 Runtime[1958:252674] NSDictionary
+2015-08-23 15:21:37.150 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.150 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.150 Runtime[1958:252674] __NSDictionaryM
+2015-08-23 15:21:37.151 Runtime[1958:252674] NSMutableDictionary
+2015-08-23 15:21:37.151 Runtime[1958:252674] NSDictionary
+2015-08-23 15:21:37.151 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.151 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.151 Runtime[1958:252674] __NSSetI
+2015-08-23 15:21:37.152 Runtime[1958:252674] NSSet
+2015-08-23 15:21:37.152 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.152 Runtime[1958:252674] -------------
+2015-08-23 15:21:37.152 Runtime[1958:252674] __NSSetM
+2015-08-23 15:21:37.153 Runtime[1958:252674] NSMutableSet
+2015-08-23 15:21:37.153 Runtime[1958:252674] NSSet
+2015-08-23 15:21:37.153 Runtime[1958:252674] NSObject
+2015-08-23 15:21:37.153 Runtime[1958:252674] -------------
+</pre>
+<p>
+因此，消息传递 <code>[array isKindOfClass:[NSMutableArray class]]</code> 的返回值应该为0，也就是
+说我们可以根据这个方法判断一个数组是否可变，但是上边有一个特殊的例子——NSString。
+</p>
+
+<p>
+在输出中，我们可以看到，在遍历父类的过程中，NSString遍历过NSMutableString，因此，无法使用
+ <code>isKindOfClass</code> 方法来判断一个字符串是否为可变字符串。实际上，想要判断类族中的对象是否为可变
+对象，最好还是使用抛出异常的方法。
+</p>
+<blockquote>
+<p>
+运行时的实现原理，还有一些类族的内部实现有可能会发生变化，因此上边的例子仅为参考。（我使用的
+Xcode版本为7.0beta4）
+</p>
+</blockquote>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2015-05-23</span>
+        <span title="last modification date" class="post-info">2015-08-23</span>
+        <span title="tags" class="post-info"><a href="/tags/runtime/">runtime</a></span>
+        <span title="author" class="post-info">Greedwolf DSS</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/2015/05/23/oc运行时小结之一";
+          var disqus_url = "http://passchaos.com/blog/2015/05/23/oc运行时小结之一";
+          var disqus_shortname = 'throughthechaos';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-61358240-1']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      </script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:greedwolf &lt;dot&gt; dss &lt;at&gt; gmail &lt;dot&gt; com">Greedwolf DSS</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
