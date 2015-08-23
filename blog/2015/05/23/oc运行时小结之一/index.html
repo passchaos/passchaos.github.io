@@ -90,7 +90,7 @@ NSLog(@"%d %d", [(id)[NSObject class] isKindOfClass:[NSObject class]],
 
 <p>
 对象、类、元类的关系如下图：
-<img src="http://7xib25.com1.z0.glb.clouddn.com/Class%5C&amp;amp;MetaClass.001.jpg" alt="Class%5C&amp;amp;MetaClass.001.jpg" />
+<img src="http://7xib25.com1.z0.glb.clouddn.com/Class&amp;amp;MetaClass.001.jpg" alt="Class&amp;amp;MetaClass.001.jpg" />
 因此，在循环中，首先获得了 <code>NSObject</code> 类的元类，然后再循环地获取元类的父类后又回到了 <code>NSObject</code> 类本身，因此
 循环中的判断条件满足；但是使用 <code>Person</code> 类时，会先在元类之间跳转，最后跳到 <code>NSObject</code> 类，然后是 <code>nil</code> ，一直没有
 满足提前返回的条件。
