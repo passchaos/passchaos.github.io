@@ -46,7 +46,7 @@ Class object_getClass(id obj)
 类中也有 ~isa~ 指针，这个指针指向类对象的类，我们称为元类。
 
 对象、类、元类的关系如下图：
-[[http://7xib25.com1.z0.glb.clouddn.com/Class&MetaClass.001.jpg]]
+[[http://7xib25.com1.z0.glb.clouddn.com/Class\&MetaClass.001.jpg]]
 因此，在循环中，首先获得了 ~NSObject~ 类的元类，然后再循环地获取元类的父类后又回到了 ~NSObject~ 类本身，因此
 循环中的判断条件满足；但是使用 ~Person~ 类时，会先在元类之间跳转，最后跳到 ~NSObject~ 类，然后是 ~nil~ ，一直没有
 满足提前返回的条件。
