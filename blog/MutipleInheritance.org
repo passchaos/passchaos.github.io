@@ -1,0 +1,12 @@
+#+TITLE:       OC中实现多继承的几种方法
+#+AUTHOR:      Greedwolf DSS
+#+EMAIL:       greedwolf.dss@gmail.com
+#+DATE:        2015-04-20 Thu
+#+URI:         /blog/%y/%m/%d/oc中实现多继承的几种方法
+#+KEYWORDS:    <TODO: insert your keywords here>
+#+TAGS:        runtime 
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+由于单继承在继承链逐渐增加后会大大增加复杂度，因此，有时我们会寻求实现“多继承”的模式。但是，
+实际上真正的多继承，如C++中的多继承弊大于利，因此，大部分语言选择用其他的方法来模拟多继承。
