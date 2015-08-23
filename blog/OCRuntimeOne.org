@@ -12,7 +12,7 @@
 因为苹果会改变运行时的底层实现原理，虽然对外的接口没有变化，但是内部的实现会经常变化。
 
 实际开发中，要用到运行时的地方很少，但是很多地方没有运行时的概念，就很难准确理解真正的含义。比如说下面的例子：
-（其中Person为一个继承自NSObject的类）
+（其中 ~Person~ 为一个继承自 ~NSObject~ 的类）
 #+BEGIN_EXAMPLE
 NSLog(@"%d %d", [(id)[NSObject class] isKindOfClass:[NSObject class]],
               [(id)[Person class] isKindOfClass:[Person class]]);
