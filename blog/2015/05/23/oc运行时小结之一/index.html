@@ -84,20 +84,20 @@ NSLog(@"%d %d", [(id)[NSObject class] isKindOfClass:[NSObject class]],
 </pre>
 </div>
 <p>
-也就是说在 <code>isKindOfClass的内部循环中，首先获取传入消息接受者对应的类。而类实际上也是一个对象，那么
-类中也有 ~isa</code> 指针，这个指针指向类对象的类，我们称为元类。
+也就是说在 <code>isKindOfClass</code> 的内部循环中，首先获取传入消息接受者对应的类。而类实际上也是一个对象，那么
+类中也有 <code>isa</code> 指针，这个指针指向类对象的类，我们称为元类。
 </p>
 
 <p>
 对象、类、元类的关系如下图：
 <img src="file:///Volumes/passchaos/notes/attatched/Class&amp;MetaClass.001.jpg" alt="Class&amp;MetaClass.001.jpg" />
-因此，在循环中，首先获得了NSObject类的元类，然后再循环地获取元类的父类后又回到了NSObject类本身，因此
-循环中的判断条件满足；但是使用Person类时，会先在元类之间跳转，最后跳到NSObject类，然后是nil，一直没有
+因此，在循环中，首先获得了 <code>NSObject</code> 类的元类，然后再循环地获取元类的父类后又回到了 <code>NSObject</code> 类本身，因此
+循环中的判断条件满足；但是使用 <code>Person</code> 类时，会先在元类之间跳转，最后跳到 <code>NSObject</code> 类，然后是 <code>nil</code> ，一直没有
 满足提前返回的条件。
 </p>
 
 <p>
-在关于isKindOfClass方法的文档说明中，使用了一个NSMutableArray的例子来演示不要使用isKindOfClass来判断
+在关于 <code>isKindOfClass</code> 方法的文档说明中，使用了一个 <code>NSMutableArray</code> 的例子来演示不要使用 <code>isKindOfClass</code> 来判断
 接受者是否可变，但是这个例子似乎是错误的，我们有例子：
 </p>
 <pre class="example">
@@ -186,11 +186,11 @@ for (id obj in objects) {
 </pre>
 <p>
 因此，消息传递 <code>[array isKindOfClass:[NSMutableArray class]]</code> 的返回值应该为0，也就是
-说我们可以根据这个方法判断一个数组是否可变，但是上边有一个特殊的例子——NSString。
+说我们可以根据这个方法判断一个数组是否可变，但是上边有一个特殊的例子—— <code>NSString</code> 。
 </p>
 
 <p>
-在输出中，我们可以看到，在遍历父类的过程中，NSString遍历过NSMutableString，因此，无法使用
+在输出中，我们可以看到，在遍历父类的过程中， <code>NSString</code> 遍历过 <code>NSMutableString</code> ，因此，无法使用
  <code>isKindOfClass</code> 方法来判断一个字符串是否为可变字符串。实际上，想要判断类族中的对象是否为可变
 对象，最好还是使用抛出异常的方法。
 </p>
