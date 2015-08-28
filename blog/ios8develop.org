@@ -1,0 +1,26 @@
+#+TITLE:       iOS8下开发的新选择
+#+AUTHOR:      Greedwolf DSS
+#+EMAIL:       greedwolf.dss@gmail.com
+#+DATE:        2015-06-28 Fri
+#+URI:         /blog/%y/%m/%d/ios8下开发的新选择
+#+KEYWORDS:    <TODO: insert your keywords here>
+#+TAGS:        <TODO: insert your tags here>
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+iOS的技术更新的很快，虽然向后兼容，但是新的API一般都是会提升开发效率的，下面列举一些：
+* 图形部分
+  - 使用UIAlertController来替换UIAlertView和UIActionSheet，以便不同平台更一致
+  - 使用active属性来添加布局约束，省去判断添加对象的步骤
+  - 使用showViewController:sender:方法，以便在UINavigationController和UISplitViewController
+    之间保持一致的调用
+  - 使用自适应cell来动态判断tableViewCell和collectionViewCell的大小
+  - 使用storyboard而不是xib来提升性能
+* 多线程
+  - 尽量多使用NSOperationQueue
+* 网络
+  - 使用NSURLSession而不是NSURLConnection
+* 数据
+  - 使用realm而不是使用sqlite/FMDB/CoreData
+* 语言
+  - 使用swift，同时搭配Alamofire/Swiftyjson/Kingfisher/realm等框架
