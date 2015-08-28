@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>iOS8下开发的新选择 - Through the Chaos!</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Greedwolf DSS" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="&lt;TODO: insert your keywords here&gt;" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link rel="stylesheet" href="/media/css/prettify.css" type="text/css">
+  </head>
+  <body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">Through the Chaos!</a></h1>
+        <p>==================&gt; 知我罪我，唯有春秋！</p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://github.com/passchaos">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="passchaos.com">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>iOS8下开发的新选择</h1>
+<p>
+iOS的技术更新的很快，虽然向后兼容，但是新的API一般都是会提升开发效率的，下面列举一些：
+</p>
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">图形部分</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<ul class="org-ul">
+<li>使用UIAlertController来替换UIAlertView和UIActionSheet，以便不同平台更一致</li>
+<li>使用active属性来添加布局约束，省去判断添加对象的步骤</li>
+<li>使用showViewController:sender:方法，以便在UINavigationController和UISplitViewController
+之间保持一致的调用</li>
+<li>使用自适应cell来动态判断tableViewCell和collectionViewCell的大小</li>
+<li>使用storyboard而不是xib来提升性能</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2">多线程</h2>
+<div class="outline-text-2" id="text-orgheadline2">
+<ul class="org-ul">
+<li>尽量多使用NSOperationQueue</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3">网络</h2>
+<div class="outline-text-2" id="text-orgheadline3">
+<ul class="org-ul">
+<li>使用NSURLSession而不是NSURLConnection</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4">数据</h2>
+<div class="outline-text-2" id="text-orgheadline4">
+<ul class="org-ul">
+<li>使用realm而不是使用sqlite/FMDB/CoreData</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5">语言</h2>
+<div class="outline-text-2" id="text-orgheadline5">
+<ul class="org-ul">
+<li>使用swift，同时搭配Alamofire/Swiftyjson/Kingfisher/realm等框架</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2015-06-28</span>
+        <span title="last modification date" class="post-info">2015-08-28</span>
+        <span title="tags" class="post-info"><a href="/tags/&lt;todo/">&lt;TODO</a>, <a href="/tags/insert-your-tags-here&gt;/">insert your tags here&gt;</a></span>
+        <span title="author" class="post-info">Greedwolf DSS</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/2015/06/28/ios8下开发的新选择";
+          var disqus_url = "http://passchaos.com/blog/2015/06/28/ios8下开发的新选择";
+          var disqus_shortname = 'throughthechaos';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-61358240-1']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      </script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:greedwolf &lt;dot&gt; dss &lt;at&gt; gmail &lt;dot&gt; com">Greedwolf DSS</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
