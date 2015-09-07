@@ -85,12 +85,12 @@ NSLog(@"%d %d", [(id)[NSObject class] isKindOfClass:[NSObject class]],
 </div>
 <p>
 也就是说在 <code>isKindOfClass</code> 的内部循环中，首先获取传入消息接受者对应的类。而类实际上也是一个对象，那么
-类中也有 <code>isa</code> 指针，这个指针指向类对象的类，我们称为元类。
+这个“类对象”中也有 <code>isa</code> 指针，这个指针指向类对象的类，我们称为元类。
 </p>
 
 <p>
 对象、类、元类的关系如下图：
-<img src="http://7xib25.com1.z0.glb.clouddn.com/Class&amp;amp;MetaClass.001.jpg" alt="Class&amp;amp;MetaClass.001.jpg" />
+<img src="http://7xib25.com1.z0.glb.clouddn.com/Class&amp;MetaClass.001.jpg" alt="Class&amp;MetaClass.001.jpg" />
 因此，在循环中，首先获得了 <code>NSObject</code> 类的元类，然后再循环地获取元类的父类后又回到了 <code>NSObject</code> 类本身，因此
 循环中的判断条件满足；但是使用 <code>Person</code> 类时，会先在元类之间跳转，最后跳到 <code>NSObject</code> 类，然后是 <code>nil</code> ，一直没有
 满足提前返回的条件。
@@ -206,7 +206,7 @@ Xcode版本为7.0beta4）
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2015-05-23</span>
-        <span title="last modification date" class="post-info">2015-08-23</span>
+        <span title="last modification date" class="post-info">2015-09-08</span>
         <span title="tags" class="post-info"><a href="/tags/runtime/">runtime</a></span>
         <span title="author" class="post-info">Greedwolf DSS</span>
       </div>
