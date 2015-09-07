@@ -43,7 +43,7 @@ Class object_getClass(id obj)
 }
 #+END_SRC
 也就是说在 ~isKindOfClass~ 的内部循环中，首先获取传入消息接受者对应的类。而类实际上也是一个对象，那么
-类中也有 ~isa~ 指针，这个指针指向类对象的类，我们称为元类。
+这个“类对象”中也有 ~isa~ 指针，这个指针指向类对象的类，我们称为元类。
 
 对象、类、元类的关系如下图：
 [[http://7xib25.com1.z0.glb.clouddn.com/Class&MetaClass.001.jpg]]
