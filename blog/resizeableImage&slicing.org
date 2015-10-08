@@ -23,8 +23,7 @@
     UIImage *newImg = [origImg resizableImageWithCapInsets:edgeInsets];
 #+END_EXAMPLE
 原始图片为：[[http://7xib25.com1.z0.glb.clouddn.com/chat_send_nor@2x.png]]
-而在Assets中，我们可以直接使用slicing的方法，比如如下图的切片：[[http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_4.png
-]]还有切片的具体数据截图：[[http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_5.png]]
+而在Assets中，我们可以直接使用slicing的方法，比如如下图的切片：[[http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_4.png]]还有切片的具体数据截图：[[http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_5.png]]
 #+BEGIN_QUOTE
 这里需要注意的一点是在切片时数据都是像素数，但是在代码中需要根据当前缩放比例来计算点数（这里比例为2.0）。
 #+END_QUOTE
