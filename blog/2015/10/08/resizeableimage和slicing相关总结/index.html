@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>resizableImage和slicing相关总结 - Through the Chaos!</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Greedwolf DSS" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="slice, resizable" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link rel="stylesheet" href="/media/css/prettify.css" type="text/css">
+  </head>
+  <body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">Through the Chaos!</a></h1>
+        <p>==================&gt; 知我罪我，唯有春秋！</p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://github.com/passchaos">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="passchaos.com">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>resizableImage和slicing相关总结</h1>
+<p>
+在给一些控件设置背景图片的时候，有时因为原图尺寸的问题，直接作为背景图片的时候系统会自动
+将其放缩，如果是默认的contentMode这个过程中会出现变形，尤其是图片边缘的变形会形成很难看的模糊边缘。
+解决的办法就是让图片角不发生变化，只变换其他位置，如此就可以解决模糊边缘的问题。
+</p>
+
+<p>
+从iOS5开始，苹果提供了resizableImageWithCapInsets:方法来替换以前的stretchable...方法，用来
+设置变化区域。新的方法提供了比久方法更多的控制空间，比如其参数就是一个UIEdgeInsets类型的结构体，可以制定
+上下左右四个方向而且还有配对的另外一个方法用于指定变换时的策略。
+</p>
+
+<p>
+比如如下的代码（为了简化说明，下边的示例都只提供垂直方向的变换）：
+</p>
+<pre class="example">
+UIImage *origImg = [UIImage imageNamed:@"chat_send_nor"];
+UIEdgeInsets edgeInsets = UIEdgeInsetsMake(19.5, 0, 19.5, 0);
+UIImage *newImg = [origImg resizableImageWithCapInsets:edgeInsets];
+</pre>
+<p>
+原始图片为：<img src="http://7xib25.com1.z0.glb.clouddn.com/chat_send_nor@2x.png" alt="chat_send_nor@2x.png" />
+而在Assets中，我们可以直接使用slicing的方法，比如如下图的切片：<a href="http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_4.png%20">http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_4.png%20</a>还有切片的具体数据截图：<img src="http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_5.png" alt="Snip20151008_5.png" />
+</p>
+<blockquote>
+<p>
+这里需要注意的一点是在切片时数据都是像素数，但是在代码中需要根据当前缩放比例来计算点数（这里比例为2.0）。
+</p>
+</blockquote>
+<p>
+最终两种方法的效果为（左边的为切片，右边的为代码指定）：<img src="http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_3.png" alt="Snip20151008_3.png" />
+</p>
+
+<p>
+我们可以看到两种方法的效果完全不同。实际上，在切片图中，我们可以发现有三条线，分别是对应
+top和bottom界限的两条边界线和中间的一条线，可以称其为inner线。
+</p>
+<blockquote>
+<p>
+top和bottom之间区域的作用是作为一个“模版”，或者拉伸，或者镜像平铺。同理，left和right也是这样，也就是说除了
+根据capInsets指定的角落外都是模版区域。
+</p>
+</blockquote>
+<p>
+但是，Xcode在上边的基础上又添加了inner线，这个线可以在可变模版区域内部再指定一个区域作为模版。如上边的
+切图中，top和inner之间的这个1像素高的区域被当作模版，因此出现了上边的效果，如果我们将inner往下拉至bottom处，
+那么切片的效果就和代码相同了，如图：<img src="http://7xib25.com1.z0.glb.clouddn.com/Snip20151008_2.png" alt="Snip20151008_2.png" />。
+</p>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2015-10-08</span>
+        <span title="last modification date" class="post-info">2015-10-09</span>
+        <span title="tags" class="post-info"><a href="/tags/slice/">slice</a>, <a href="/tags/ios/">iOS</a></span>
+        <span title="author" class="post-info">Greedwolf DSS</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/2015/10/08/resizeableimage和slicing相关总结";
+          var disqus_url = "http://passchaos.com/blog/2015/10/08/resizeableimage和slicing相关总结";
+          var disqus_shortname = 'throughthechaos';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-61358240-1']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      </script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:greedwolf &lt;dot&gt; dss &lt;at&gt; gmail &lt;dot&gt; com">Greedwolf DSS</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
