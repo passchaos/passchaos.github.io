@@ -31,13 +31,236 @@
 <div>
 <div class="post">
 <h1>Block和循环引用“终极解密”</h1>
+<p>
+ARC对于性能要求比较高的地方相对于GC有很大的优势，iOS比Android流畅或许也有ARC的一点
+功劳，但是ARC却并不能完全自动的解决内存问题，尤其是在出现循环饮用的情况下。
+</p>
+
+<p>
+OC中主要有两种需要注意循环引用的情景，使用“委托”模式和使用block的时候。当然在使用“委托”
+的时候，情景比较简单，直接一个使用weak一个使用strong即可，或许版本比较老的话使用
+unsafe_unretained，而block的情形就比较复杂了。
+</p>
+
+<p>
+为了更为清晰地解释，我们首先了解一下block。
+</p>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1">block说明</h2>
+<div class="outline-text-2" id="text-orgheadline1">
+<p>
+从形式上看，block和C语言的函数指针很相似，不过是将“*“号换成了“^“号，但是实际上内部地
+差别还是很大的。
+</p>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2">block会对“可能超出block执行域”的变量做一个copy</h3>
+<div class="outline-text-3" id="text-orgheadline2">
+<p>
+block的引入主要就是方便了执行，可以在任意的地方去执行它。但是这样就引入了一个矛盾：
+变量作用域。正常情况下，超出变量定义范围的变量不可用。因此在MRR的环境下，一般还要
+对于block对象做一下copy操作（没有使用外部变量的block除外），将其从栈中（在使用了外部变量的情况下）复制到堆中，
+同时这个过程也会将需要用到的有动态存储期限的变量做一个copy到堆操作。而在ARC下，这个
+过程被编译器自动处理。
+</p>
+<blockquote>
+<p>
+哪些为动态存储的变量？常见的就是局部动态变量和函数参数，因此一般block内部使用了这些
+变量的时候，就会做一个copy。 <i>Warning:</i> 这里有一个例外——数组，因为复制的时候使用的
+是类似函数的值复制方式，就是如int a = b这种情形，但是C语言数组不能直接使用赋值的方法
+创建新数组，因此在block内部不能直接使用外部的C语言数组。
+</p>
+
+<p>
+那么，又有哪些变量不会做copy操作呢？如果一个变量在程序的整个运行区域内都存在，那么显然
+我们就不需要对其做一个copy操作，如全局变量，显然不需要。此外还有一种重要的数据类型——局部
+静态变量，不过虽然局部静态变量一旦定义会一直存在，但是其作用域受限，但是C语言里面有一个
+很强大或者说是过于强大的概念——指针，我们只需要用一个指针指向这个局部静态变量即可。因此
+block做copy操作后block内部会有一个指向局部静态变量的指针变量。
+</p>
+
+<p>
+涉及到OC语言，显然普通的对象在ARC下都相当于是动态存储期限的，因此ARC下，也会对block内部
+使用的对象变量做一个copy，就是将指向对象内容的那个变量复制一份到堆。如果使用__block修饰
+的话，那么有点像局部静态变量，是在堆里面创建了一个指针，不过这个指针指向对象的引用，实际
+就是指针的指针。
+</p>
+</blockquote>
+
+<p>
+上面解释了block对于其内部使用的变量的影响，那么问题就来了，如果在block内部使用了一个
+对象，也就是说多了一个对于那个对象的强引用，一旦block这个对象不能销毁掉，那么其引用
+的对象也就不能销毁，这样就会出现内存泄漏。
+</p>
+<blockquote>
+<p>
+iOS开发中主要可能的block不能释放导致的内存泄漏有两种情形：
+</p>
+<ol class="org-ol">
+<li>block内部使用的对象本身又对block有一个强引用，这样就出现了循环引用。常见的情形为</li>
+</ol>
+<p>
+一个对象将block作为其一个属性，而block内部又使用了self。
+</p>
+<ol class="org-ol">
+<li>有一个第三方一直存在的对象对于block有一个强引用。这种情形比较少见，比如在通知中心</li>
+</ol>
+<p>
+使用block对象作为监听者的时候，block内部又使用了self，那么因为通知中心不会释放，因此
+block就不会被释放，因此self指向的对象也就不会被释放。
+</p>
+</blockquote>
+</div>
+</div>
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3">如何解决block的循环引用</h3>
+<div class="outline-text-3" id="text-orgheadline3">
+<p>
+如上边所说，重要的是block内部多了一个对象的强引用（使用的话），因此解决方法就是消除这个多出的强引用。
+消除强引用的方法一般就是使用一个指向对象的弱引用，这种方法很常见，就不说明了。当然对于通知
+中心的情形，除此之外，还可以使用删除监听者的方法（不过不能写在dealloc中），后一个方法可能更适合。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6">block与多线程</h2>
+<div class="outline-text-2" id="text-orgheadline6">
+</div><div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4">多线程下的循环引用解决</h3>
+<div class="outline-text-3" id="text-orgheadline4">
+<p>
+上边已经介绍了解决循环引用的方法，就是使用弱引用。不过由于多线程的复杂情况，我们可能会遇到
+self为nil的情形。虽说即使为nil，程序也不会报错，但是既然使用了self，当然我们就需要它。因此
+我们可以监测一下。
+</p>
+
+<p>
+比如下面的例子：
+</p>
+<pre class="example">
+__weak typeof(self) weakSelf = self;
+self.testBlk = ^{
+[weakSelf test1];
+[weakSelf test2];
+}
+</pre>
+<p>
+在运行的时候，很可能weakSelf为nil，第一想法，我们检查一下weakSelf是否为nil，然后根据情况进行
+对应的操作：
+</p>
+<pre class="example">
+__weak typeof(self) weakSelf = self;
+self.testBlk = ^{
+if (weakSelf == nil) {
+NSLog(@"hhh");
+} else {
+[weakSelf test1];
+[weakSelf test2];
+}
+}
+</pre>
+<p>
+但是多线程很复杂，因为weakSelf并不能延长对象的生命期，因此即使在if的测试语句中weakSelf不为nil，
+但是在执行test1的时候有可能weakSelf为nil，甚至会出现执行test1的时候不为nil，但是执行test2的
+时候为nil。因此想要验证一个对象是否为nil，只能使用强引用来验证，并且使用强引用来接受消息，但是
+若是直接使用了强引用，block又有可能会出现循环引用，因此，苹果提供了一种方法——weak-strong dance。
+</p>
+
+<p>
+weak－strong dance的使用方法如例：
+</p>
+<pre class="example">
+__weak typeof(self) weakSelf = self;
+self.testBlk = ^{
+__strong typeof(weakSelf) strongSelf = weakSelf;
+[strongSelf test1];
+[strongSelf test2];
+}
+</pre>
+<p>
+上边的例子中，在block内部使用一个强引用指向weakSelf，避免了循环引用。
+</p>
+<blockquote>
+<p>
+为什么这样使用避免了循环饮用，strongSelf不是也指向self吗？实际上这个涉及到block定义和执行的差别。
+上边的例子中使用了strongSelf，他确实是一个指向self的强引用，但是在定义的时候这个引用关系却并没有
+建立。定义只是创建了需要的变量，只有执行的时候，block内部的语句才发挥作用，也就是说执行之后，
+strongSelf才指向了self，之前只是nil而已。
+</p>
+</blockquote>
+<p>
+同时，由于strongSelf是指向self的强引用，我们也可以用它来判断self这个对象此时是否为nil，因为如果
+block执行的时候self对象存在，那么由于strongSelf的关系，在block执行期间，self对象都不会被销毁（
+strongSelf这个强引用延长了self对象的生命期）。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5">图形相关对象的销毁</h3>
+<div class="outline-text-3" id="text-orgheadline5">
+<p>
+在多线程情形下，手动创建的线程一般为“分离式”线程，因此线程中的对象会在所在的线程内回收。但是
+某些对象并不能在主线程之外的线程进行更改和删除操作，如UIView和UIViewController对象。那么，
+在上面的weak-strong dance方法中，就可能会出现self对象在block执行的线程中释放的情况，这
+很可能会出现问题的，而苹果的“Simple and Reliable Threading with NSOperation”文档中
+也确实提到了这个问题，甚至AFNetworking的issue（<a href="https://github.com/AFNetworking/AFNetworking/issues/56">https://github.com/AFNetworking/AFNetworking/issues/56</a>）里面也讨论了这个问题，不过我觉得将block对应
+属性赋值为nil实际并没有避免视图相关对象在非主线程释放的问题。
+</p>
+
+<p>
+但是Simple这片文档的时间很是奇妙，最近的更新时间为2010－08-27，而苹果提出的weak-strong
+ dance是在2011年的WWDC上边提出的。因此我很好奇地在次要线程创建了一个UIViewController对象，
+以便观察它会在那个线程释放。神奇的事情发生了，这个UIViewController对象竟然是在主线程销毁的。
+在调用堆栈中可以清楚地看到，在次要线程销毁的时候其有一个对于主线程的入队操作，而这个入队操作就是
+用来释放视图相关对象的，看来，可能在2011年，苹果就已经更改了相关的内部实现，我们完全不用担心
+视图对象会在非主线程释放的问题。
+</p>
+<blockquote>
+<p>
+需要注意的是，上边的issue链接中的一帮大神（包括mattt）讨论了好久，却没有人实际地测试，看来写程序
+还是需要自己亲自尝试一下才好（读者也是），不过也暴露了另一个问题，iOS由于闭源的原因，大部分的实现细节
+都需要苹果提供，但是苹果的有些文档更新并不及时，很多很重要的信息隐藏在更新日志或WWDC的视频中，甚至
+如上边的问题一样完全没有信息甚至过时的信息。
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7">GCD和NSOperation中的block</h2>
+<div class="outline-text-2" id="text-orgheadline7">
+<p>
+block一大亮点就是简化了并发程序，在GCD和NSOperation中都大量使用了block，尤其是在对象本身具有
+一个队列属性（不管是调度队列还是操作队列）的时候，显然对象对于队列有了一个强引用，那么如果向队列
+添加block的时候，如果block内部还使用了self，那么是不是就会出现循环饮用了呢？
+</p>
+
+<p>
+答案是不会！确实，添加block到队列的时候，队列确实对于block有一个强引用，但是这个强引用却并不是
+一直都在的，当block对应的任务完成之后，队列会自动删除对于block的强引用，因此不会出现循环引用。
+</p>
+
+<p>
+到这里为止，我了解到的block相关的内存问题都已经说明了，如果还有其他情形，欢迎添加评论。
+</p>
+<blockquote>
+<p>
+温馨提示：即使是大神的话也要试验一下，更何况我这个无名小卒，一定要自己亲自试验！
+</p>
+</blockquote>
+</div>
+</div>
 
 </div>
 </div>
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2015-09-16</span>
-        <span title="last modification date" class="post-info">2015-10-09</span>
+        <span title="last modification date" class="post-info">2015-10-13</span>
         <span title="tags" class="post-info"><a href="/tags/block/">block</a>, <a href="/tags/weak-strong-dance/">weak-strong dance</a></span>
         <span title="author" class="post-info">Greedwolf DSS</span>
       </div>
