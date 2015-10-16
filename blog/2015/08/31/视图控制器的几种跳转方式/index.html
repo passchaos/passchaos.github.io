@@ -31,13 +31,45 @@
 <div>
 <div class="post">
 <h1>视图控制器的几种跳转方式</h1>
+<p>
+控制器的跳转一般通过container ViewController来实现，如常用的UITabBarController和UINavigationController，当然，在iPad上边还有重要的UISplitController和UIPopoverController。
+</p>
+
+<p>
+当然虽然具体的表现形式不同，但是在代码层级上一般就是
+presentViewController这种模式，不过在iOS8之后，UINavigationController使用了新引入的showViewController方式，降低了耦合度，也和UISplitController达成了统一。
+</p>
+
+<p>
+而在IB层级，常用的就是segue——各种类型的segue。segue大大降低了代码复杂度，而且具体的跳转方式也很容易更改，推荐使用。
+</p>
+
+<p>
+当然上边的都是普通的跳转，有时我们会需要反向的跳转，比如UINavigationController中的对应push的pop类型，present对应的dismiss，实际上这两种类型还可以在很多层中使用，比如pop到rootViewController，dismiss到最底层的presentingViewController。
+</p>
+
+<p>
+上边的两种反向跳转功能都很强大，但是却也有很大的缺陷，比如他们如果要在跳转的时候传值的话需要使用delegate或是block，这样实际上很容易增加耦合度，尤其是使用代理的情况。
+</p>
+
+<p>
+而在前面也说过，在IB中我们可以使用segue，实际上segue除了有使用方便，易于更改的好处，还有一种很重要的优势——方便传值。而segue的这种传值方式利用了“依赖注入”的方式，这是一种没有列入“四人帮”巨著的设计模式——“控制反转”的主要表现形式。
+</p>
+
+<p>
+IB中的segue可以方便地进行前向跳跃，那么怎么进行反向跳跃呢？iOS里边给我们提供了unwindSegue这种方式，具体使用方式可以见苹果的文档。这种unwindSegue的方式就像普通的segue将present和push抽象出来一样将dismiss和pop抽象了出来，因此也拥有了普通segue的全部优点：方便使用、易于更改和依赖注入。
+</p>
+
+<p>
+而除了上边的几点，我觉得最好的优点是：不管你是present出来的控制器还是push出来的控制器，甚至是这两种的混合模式，使用unwindSegue都可以跳转到任何的前边的控制器中。但是不幸的一点是，可能这个unwindSegue的功能实在是太强大了，因此对应的使用方法也是在不断地更改，在iOS9.1中，苹果也正式引入了unwindSegue这种对象类型（以前一直是使用普通的segue），等到iOS9.1发布后，我再来更新此文吧！
+</p>
 
 </div>
 </div>
     <div>
       <div class="post-meta">
         <span title="post date" class="post-info">2015-08-31</span>
-        <span title="last modification date" class="post-info">2015-09-08</span>
+        <span title="last modification date" class="post-info">2015-10-16</span>
         <span title="tags" class="post-info"><a href="/tags/segue/">segue</a>, <a href="/tags/de/">de</a></span>
         <span title="author" class="post-info">Greedwolf DSS</span>
       </div>
